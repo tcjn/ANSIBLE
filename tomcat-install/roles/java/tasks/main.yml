@@ -1,0 +1,22 @@
+---
+  - name: -> Determine if JAVA exist
+    stat: path=/usr/java/jdk1.{{ java_release }}.0_{{ java_update }}
+    register: java_version
+
+  - name: -> Java folder
+    file: path=/usr/java state=directory
+
+  - name: -> Unzip JAVA source
+    unarchive: src=http://mirrors.linuxeye.com/jdk/jdk-{{ java_release }}u{{ java_update }}-linux-x64.tar.gz dest=/usr/java/ remote_src=yes
+    when: java_version.stat.exists == False
+
+  - name: -> Prepare default JAVA location
+    file: src=/usr/java/jdk1.{{ java_release }}.0_{{ java_update }} dest=/usr/java/latest state=link
+
+  - lineinfile: dest=/etc/profile line="export JAVA_HOME="/usr/java/latest""
+
+
+
+
+
+

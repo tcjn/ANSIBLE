@@ -1,0 +1,38 @@
+---
+  - name: -> Determine if TOMCAT is already here
+    stat: path=/usr/local/apache-tomcat-{{ tomcat_release }}.0.{{ tomcat_version }}
+    register: tomcat_exist
+
+  - name: -> Unzip TOMCAT source
+    unarchive: src={{ repo }}/tomcat-{{ tomcat_release }}/v{{ tomcat_release }}.0.{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_release }}.0.{{ tomcat_version }}.tar.gz dest=/usr/local/ remote_src=yes
+    when: tomcat_exist.stat.exists == False
+
+  - name: -> Prepare default TOMCAT location
+    file: src=/usr/local/apache-tomcat-{{ tomcat_release }}.0.{{ tomcat_version }} dest=/usr/local/tomcat state=link
+
+  - name: -> Prepare application folder
+    file: path=/usr/local/tomcat{{ tomcat_release }}.0-webapp-instance state=directory
+
+  - name: -> Prepare default APP location
+    file: src=/usr/local/tomcat{{ tomcat_release }}.0-webapp-instance  dest=/usr/local/webappinst state=link
+
+  - name: -> App folder
+    file: path=/usr/local/webappinst/{{ app }}-{{ env }} state=directory
+
+  - name: -> Prepare separated INSTANCE for APP
+    unarchive: src=http://tycjan.net/tomcat_template.zip dest=/usr/local/webappinst/{{ app }}-{{ env }}/ remote_src=yes
+
+  - name: -> Replace server.xml
+    template: src=server_xml.j2 dest=/usr/local/webappinst/{{ app }}-{{ env }}/conf/server.xml mode=0644
+
+  - name: -> Configure init script for Tomcat
+    template: src=tomcat_init.j2  dest=/etc/init.d/tomcat mode=0755
+
+  - name: -> Register service tomcat
+    command: chkconfig tomcat on
+
+  - name: -> Starting Tomcat
+    service: name=tomcat state=restarted enabled=yes
+
+  - name: wait for tomcat to start
+    wait_for: port=8080

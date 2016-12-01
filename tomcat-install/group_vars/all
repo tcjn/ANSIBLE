@@ -1,0 +1,23 @@
+# MAIN
+repo: http://ftp.ps.pl/pub/apache/tomcat
+
+# JAVA version
+java_release: 8
+java_update: 112
+
+# TOMCAT version
+tomcat_release: 7
+tomcat_version: 73
+tomcat_http_port: 8080
+tomcat_ajp_port: 8009
+
+# Application settings
+app: bg
+env: qa
+
+
+
+
+
+
+
